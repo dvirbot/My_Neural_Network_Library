@@ -94,8 +94,8 @@ class Neuron:
 
 class Weight:
     def __init__(self):
-        # self.value = random.gauss(mu=0, sigma=1)
-        self.value = 2
+        self.value = random.gauss(mu=0, sigma=1)
+        # self.value = 2
         self.derivative = 0
 
     def update_derivatives(self, derivative):
