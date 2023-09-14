@@ -1,11 +1,14 @@
 import numpy as np
 import random
 
+
 class NeuralNetwork:
-    def __init__(self, number_of_inputs: int, loss_function, layers=[]):
-        self.number_of_inputs = number_of_inputs
-        self.layers: list[DenseLayer] = layers
-        self.loss_function = loss_function
+    def __init__(self, size_of_inputs: int, layers=None, keep_buffer=False):
+        self.size_of_inputs = size_of_inputs
+        if layers is None:
+            self.layers: list[DenseLayer] = []
+        else:
+            self.layers: list[DenseLayer] = layers
         self.inputs = []
 
     def add_layer(self, layer):
@@ -68,12 +71,14 @@ class Neuron:
         self.activation_function: ActivationFunction = activation_function
         self.value = 0
         self.pre_activation_value = 0
+        self.pre_activation_value_buffer = []
 
     def forwards(self, inputs: list):
         self.pre_activation_value = 0
         for i in range(len(inputs)):
             self.pre_activation_value += inputs[i] * self.weights[i].value
         self.pre_activation_value += self.bias.value
+        self.pre_activation_value_buffer.append(self.pre_activation_value)
         self.value = self.activation_function.apply(self.pre_activation_value)
         return self.value
 

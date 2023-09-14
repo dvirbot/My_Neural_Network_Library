@@ -53,7 +53,7 @@ def apply_sin(v1: Variable, vars_list):
     return new_var
 
 
-def exponentiate_by_const(v1: Variable, const, vars_list):
+def apply_constant_power(v1: Variable, const, vars_list):
     new_var = Variable(value=v1.value ** const,
                        parents=[v1],
                        parent_derivative_multiplier=[const * v1.value ** (const - 1)])
@@ -61,10 +61,11 @@ def exponentiate_by_const(v1: Variable, const, vars_list):
     return new_var
 
 
-x1 = Variable(5, [], [])
+x1 = Variable(3.14, [], [])
+x2 = Variable(2, [], [])
 vars_list: list[Variable] = []
-y = apply_sin(exponentiate_by_const(x1, 3, vars_list), vars_list)
+y = apply_sin(multiply_by_var(apply_constant_power(x1, 3, vars_list), x2, vars_list), vars_list)
 y.derivative = 1
 for i in range(len(vars_list) - 1, -1, -1):
     vars_list[i].go_backwards()
-print(f"dx1={x1.derivative}")
+print(f"dx1={x1.derivative}, dx2={x2.derivative}")
