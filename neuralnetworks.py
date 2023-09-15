@@ -10,18 +10,47 @@ class NeuralNetwork:
         else:
             self.layers: list[DenseLayer] = layers
         self.inputs = []
+        if keep_buffer:
+            self.keep_buffer = True
+            self.buffer = []
+        else:
+            self.keep_buffer = False
 
     def add_layer(self, layer):
         self.layers.append(layer)
+        if self.keep_buffer:
+            self.buffer.append = []
 
     def forwards(self, inputs: list):
+        if self.keep_buffer:
+            return self.forwards_with_buffer(inputs)
         self.inputs = inputs
         last_layer_outputs = inputs
         for layer in self.layers:
             last_layer_outputs = layer.forwards(last_layer_outputs)
         return last_layer_outputs
 
+    def forwards_with_buffer(self, inputs: list):
+        self.inputs = inputs
+        last_layer_outputs = inputs
+        for i in range(len(self.layers)):
+            self.buffer[i].append(last_layer_outputs)
+            last_layer_outputs = self.layers[i].forwards(last_layer_outputs)
+        return last_layer_outputs
+
     def backwards(self, loss_function_gradients):
+        if self.keep_buffer:
+            self.backwards_with_buffer(loss_function_gradients)
+        current_layer_derivatives = loss_function_gradients
+        for i in range(1, len(self.layers), 1):
+            current_layer_derivatives = self.layers[-i].backwards(current_layer_derivatives,
+                                                                  self.layers[-i - 1].values)
+        self.layers[0].backwards(current_layer_derivatives,
+                                 self.inputs)
+
+    def backwards_with_buffer(self, loss_function_gradients):
+        # TODO: Finish this. I want to see if I will be able to send in a whole list of gradients,
+        #  or if this list itself depends on the values in the buffer.
         current_layer_derivatives = loss_function_gradients
         for i in range(1, len(self.layers), 1):
             current_layer_derivatives = self.layers[-i].backwards(current_layer_derivatives,
@@ -38,8 +67,8 @@ class NeuralNetwork:
             for layer in self.layers:
                 for neuron in layer.neurons:
                     for weight in neuron.weights:
-                        file.write(weight.value)
-                    file.write(neuron.bias.value)
+                        file.write(str(weight.value)+"\n")
+                    file.write(str(neuron.bias.value)+"\n")
 
     def load_weights(self, filepath):
         with open(filepath, 'r') as file:
@@ -47,8 +76,8 @@ class NeuralNetwork:
         for layer in self.layers:
             for neuron in layer.neurons:
                 for weight in neuron.weights:
-                    weight.value = weights.pop(0)
-                neuron.bias.value = weights.pop(0)
+                    weight.value = float(weights.pop(0))
+                neuron.bias.value = float(weights.pop(0))
 
 
 
