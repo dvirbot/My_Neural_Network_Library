@@ -33,6 +33,25 @@ class NeuralNetwork:
         for layer in self.layers:
             layer.descend_the_gradient(learning_rate)
 
+    def save_weights(self, filename):
+        with open(filename, 'w') as file:
+            for layer in self.layers:
+                for neuron in layer.neurons:
+                    for weight in neuron.weights:
+                        file.write(weight.value)
+                    file.write(neuron.bias.value)
+
+    def load_weights(self, filepath):
+        with open(filepath, 'r') as file:
+            weights = file.readlines()
+        for layer in self.layers:
+            for neuron in layer.neurons:
+                for weight in neuron.weights:
+                    weight.value = weights.pop(0)
+                neuron.bias.value = weights.pop(0)
+
+
+
 
 class DenseLayer:
     def __init__(self, number_of_neurons: int, size_of_inputs, activation_function):
