@@ -18,8 +18,6 @@ class NeuralNetwork:
 
     def add_layer(self, layer):
         self.layers.append(layer)
-        if self.keep_buffer:
-            self.buffer.append = []
 
     def forwards(self, inputs: list):
         if self.keep_buffer:
@@ -31,11 +29,14 @@ class NeuralNetwork:
         return last_layer_outputs
 
     def forwards_with_buffer(self, inputs: list):
+        values_snapshot = []
         self.inputs = inputs
         last_layer_outputs = inputs
         for i in range(len(self.layers)):
-            self.buffer[i].append(last_layer_outputs)
+            values_snapshot.append(last_layer_outputs)
             last_layer_outputs = self.layers[i].forwards(last_layer_outputs)
+        values_snapshot.append(last_layer_outputs)
+        self.buffer.append(values_snapshot)
         return last_layer_outputs
 
     def backwards(self, loss_function_gradients):
@@ -45,18 +46,20 @@ class NeuralNetwork:
         for i in range(1, len(self.layers), 1):
             current_layer_derivatives = self.layers[-i].backwards(current_layer_derivatives,
                                                                   self.layers[-i - 1].values)
-        self.layers[0].backwards(current_layer_derivatives,
+        # Input derivatives are for architectures where there may be multiple neural networks, and the results of one
+        # NN may be the inputs to another.
+        input_derivatives = self.layers[0].backwards(current_layer_derivatives,
                                  self.inputs)
+        return input_derivatives
 
-    def backwards_with_buffer(self, loss_function_gradients):
-        # TODO: Finish this. I want to see if I will be able to send in a whole list of gradients,
-        #  or if this list itself depends on the values in the buffer.
-        current_layer_derivatives = loss_function_gradients
-        for i in range(1, len(self.layers), 1):
-            current_layer_derivatives = self.layers[-i].backwards(current_layer_derivatives,
-                                                                  self.layers[-i - 1].values)
-        self.layers[0].backwards(current_layer_derivatives,
-                                 self.inputs)
+    def backwards_with_buffer(self, loss_function_gradients_list):
+        for i in range(len(loss_function_gradients_list)):
+            current_layer_derivatives = loss_function_gradients_list[i]
+            for j in range(1, len(self.layers), 1):
+                current_layer_derivatives = self.layers[-j].backwards(current_layer_derivatives,
+                                                                      self.buffer[i][-j - 1])
+            self.layers[0].backwards(current_layer_derivatives,
+                                     self.buffer[i][0])
 
     def descend_the_gradient(self, learning_rate):
         for layer in self.layers:
