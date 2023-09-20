@@ -59,6 +59,7 @@ class ReinforceAgent:
     def update_weights(self, learning_rate):
         # !! Time limits make an environment not a Markov Decision Process unless the time limit is part of the state
         # of the environment, in which case an RL agent may be interested in it!
+        learning_rate *= -1
         gradients = []
         value_at_timestep = 0
         for i in range(1, self.episode_len + 1):

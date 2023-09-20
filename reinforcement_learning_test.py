@@ -18,10 +18,30 @@ reinforce_agent = reinforcement_learning.ReinforceAgent(neural_network=neural_ne
                                                         num_possible_actions=2,
                                                         future_discount_factor=0.99)
 
+
+
+cartpole_env = gym.make("CartPole-v1", render_mode="human")
+
+for j in range(10):
+    observation: np.ndarray
+    observation, info = cartpole_env.reset()
+    observation: list = observation.tolist()
+    terminated = False
+    truncated = False
+    reward = None
+    while not terminated or truncated:
+        observation, reward, terminated, truncated, info = cartpole_env.step(
+            action=reinforce_agent.take_step(observations=observation))
+        cartpole_env.render()
+        observation = observation.tolist()
+    reinforce_agent.episode_reset()
+
+cartpole_env.close()
+
 cartpole_env = gym.make("CartPole-v1")
 
-episodes = 1000000
-learning_rate = 5e-8
+episodes = 10001
+learning_rate = 5e-6
 report_frequency = 1000
 
 for i in range(episodes):
@@ -61,6 +81,7 @@ for i in range(episodes):
         #     cartpole_env.reset()
         #     break
 
+cartpole_env.close()
 cartpole_env = gym.make("CartPole-v1", render_mode="human")
 
 for j in range(10):
