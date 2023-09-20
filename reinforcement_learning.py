@@ -25,10 +25,7 @@ class ReinforceAgent:
         self.neural_network = neural_network
         self.action_space = [i for i in range(num_possible_actions)]
         self.future_discount_factor = future_discount_factor
-        self.rewards = []
-        self.previous_step_probabilities = []
-        self.previous_actions = []
-        self.episode_len = 0
+        self.episode_reset()
 
     def episode_reset(self):
         self.rewards = []
@@ -63,13 +60,13 @@ class ReinforceAgent:
         gradients = []
         value_at_timestep = 0
         for i in range(1, self.episode_len + 1):
-            value_at_timestep += self.rewards[-i] * self.future_discount_factor ** self.episode_len + 1 - i
+            value_at_timestep += self.rewards[-i] * self.future_discount_factor ** (self.episode_len - i)
             action_probabilities_at_timestep = self.previous_step_probabilities[-i]
             action_at_timestep = self.previous_actions[-i]
-            gradients.append(value_at_timestep / action_probabilities_at_timestep[action_at_timestep]
-                               * np.array(softmax_gradient(prob_distribution=action_probabilities_at_timestep,
-                                                           action=action_at_timestep))
-                               )
+            gradients.append(np.multiply((value_at_timestep / action_probabilities_at_timestep[action_at_timestep]),
+                                         np.array(softmax_gradient(prob_distribution=action_probabilities_at_timestep,
+                                                                   action=action_at_timestep))).tolist()
+                             )
         gradients.reverse()
-        self.neural_network.backwards_with_buffer(loss_function_gradients_list=gradients)
+        self.neural_network.backwards(loss_function_gradients=gradients)
         self.neural_network.descend_the_gradient(learning_rate=learning_rate)

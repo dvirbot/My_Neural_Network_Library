@@ -41,7 +41,7 @@ class NeuralNetwork:
 
     def backwards(self, loss_function_gradients):
         if self.keep_buffer:
-            self.backwards_with_buffer(loss_function_gradients)
+            return self.backwards_with_buffer(loss_function_gradients)
         current_layer_derivatives = loss_function_gradients
         for i in range(1, len(self.layers), 1):
             current_layer_derivatives = self.layers[-i].backwards(current_layer_derivatives,
@@ -60,6 +60,7 @@ class NeuralNetwork:
                                                                       self.buffer[i][-j - 1])
             self.layers[0].backwards(current_layer_derivatives,
                                      self.buffer[i][0])
+        self.buffer = []
 
     def descend_the_gradient(self, learning_rate):
         for layer in self.layers:
