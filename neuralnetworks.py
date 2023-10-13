@@ -88,6 +88,7 @@ class NeuralNetwork:
 
 class DenseLayer:
     def __init__(self, number_of_neurons: int, size_of_inputs, activation_function):
+        self.number_of_neurons = number_of_neurons
         self.neurons = [Neuron(size_of_inputs, activation_function) for i in range(number_of_neurons)]
         self.values = []
 

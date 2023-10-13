@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import copy
 import neuralnetworks
 
 
@@ -21,9 +22,10 @@ def softmax_gradient(prob_distribution, action):
 
 
 class ReinforceAgent:
-    def __init__(self, neural_network: neuralnetworks.NeuralNetwork, num_possible_actions, future_discount_factor=0.99):
+    def __init__(self, neural_network: neuralnetworks.NeuralNetwork, future_discount_factor=0.99):
         self.neural_network = neural_network
-        self.action_space = [i for i in range(num_possible_actions)]
+        self.neural
+        self.action_space = [i for i in range(neural_network.layers[-1].number_of_neurons)]
         self.future_discount_factor = future_discount_factor
         self.episode_reset()
 
@@ -70,3 +72,43 @@ class ReinforceAgent:
         gradients.reverse()
         self.neural_network.backwards(loss_function_gradients=gradients)
         self.neural_network.descend_the_gradient(learning_rate=learning_rate)
+
+class Experience:
+    def __init__(self, observation, action, reward, next_observation):
+        self.bservation = observation
+        self.action = action
+        self.reward = reward
+        self.next_observation = next_observation
+
+class ReplayBuffer:
+    def __init__(self, max_size):
+        self.buffer : list[Experience] = []
+        self.max_size = max_size
+        self.index = -1
+        self.full = False
+        self.observation = None
+        self.action = None
+
+    def update_buffer(self, observation, action, reward):
+        if self.full:
+            self.buffer[self.index] = Experience(self.observation, self.action, reward, observation)
+        elif not self.index == -1:
+            self.buffer.append(Experience(self.observation, self.action, reward, observation))
+        self.observation = observation
+        self.action = action
+        self.index += 1
+        if self.index == self.max_size:
+            self.index = 0
+
+
+class DQNAgent:
+    def __init__(self, neural_network: neuralnetworks.NeuralNetwork, future_discount_factor, replay_buffer_size):
+        self.current_q_network = neural_network
+        self.previous_q_network = copy.deepcopy(self.current_q_network)
+        self.action_space = [i for i in range(neural_network.layers[-1].number_of_neurons)]
+        self.replay_buffer = ReplayBuffer(max_size=replay_buffer_size)
+
+    def take_step(self, observation, reward=None):
+        self.current_q_network.forwards()
+
+

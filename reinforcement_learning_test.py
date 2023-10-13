@@ -15,24 +15,23 @@ neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
                                                    size_of_inputs=10,
                                                    activation_function=neuralnetworks.ActivationFunction()))
 reinforce_agent = reinforcement_learning.ReinforceAgent(neural_network=neural_network,
-                                                        num_possible_actions=2,
                                                         future_discount_factor=1)
 
 cartpole_env = gym.make("CartPole-v1", render_mode="human")
 
-# for j in range(10):
-#     observation: np.ndarray
-#     observation, info = cartpole_env.reset()
-#     cartpole_env.render()
-#     observation: list = observation.tolist()
-#     terminated = False
-#     truncated = False
-#     reward = None
-#     while not terminated or truncated:
-#         observation, reward, terminated, truncated, info = cartpole_env.step(
-#             action=reinforce_agent.take_step(observations=observation))
-#         observation = observation.tolist()
-#     reinforce_agent.episode_reset()
+for j in range(10):
+    observation: np.ndarray
+    observation, info = cartpole_env.reset()
+    cartpole_env.render()
+    observation: list = observation.tolist()
+    terminated = False
+    truncated = False
+    reward = None
+    while not terminated or truncated:
+        observation, reward, terminated, truncated, info = cartpole_env.step(
+            action=reinforce_agent.take_step(observations=observation))
+        observation = observation.tolist()
+    reinforce_agent.episode_reset()
 
 cartpole_env.close()
 
@@ -61,10 +60,10 @@ for i in range(episodes):
     reinforce_agent.episode_reset()
     if i%report_frequency == 0:
         print(f"Episode: {i}, avg_reward: {total_reward / report_frequency} ")
+        if total_reward/1000 > 40:
+            cartpole_env.reset()
+            break
         total_reward = 0
-        # if total_reward/100 > 60:
-        #     cartpole_env.reset()
-        #     break
 
 cartpole_env.close()
 cartpole_env = gym.make("CartPole-v1", render_mode="human")
