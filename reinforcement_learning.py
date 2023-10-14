@@ -24,7 +24,6 @@ def softmax_gradient(prob_distribution, action):
 class ReinforceAgent:
     def __init__(self, neural_network: neuralnetworks.NeuralNetwork, future_discount_factor=0.99):
         self.neural_network = neural_network
-        self.neural
         self.action_space = [i for i in range(neural_network.layers[-1].number_of_neurons)]
         self.future_discount_factor = future_discount_factor
         self.episode_reset()
