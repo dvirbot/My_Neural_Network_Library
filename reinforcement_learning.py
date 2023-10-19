@@ -2,6 +2,7 @@ import numpy as np
 import random
 import copy
 import neuralnetworks
+import _pickle
 
 
 def softmax(values):
@@ -155,7 +156,9 @@ class DQNAgent:
         return action
 
     def update_target(self):
-        self.target_q_network = copy.deepcopy(self.current_q_network)
+        # self.target_q_network = copy.deepcopy(self.current_q_network)
+        #I am using this instead of the commented deepcopy code because deepcopy was very slow for some reason
+        self.target_q_network = _pickle.loads(_pickle.dumps(self.current_q_network))
 
     def update_weights(self, learning_rate):
         learning_rate *= 1

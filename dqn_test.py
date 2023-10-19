@@ -72,7 +72,7 @@ for i in range(episodes):
         #     cartpole_env.reset()
         #     break
         total_reward = 0
-    if i % eval_frequency == 0 and i > 1:
+    if i % eval_frequency == 0 and i > 1 or total_reward/report_frequency > 100:
         eval_reward = 0
         for j in range(1000):
             observation: np.ndarray
@@ -83,7 +83,7 @@ for i in range(episodes):
             reward = None
             while not (terminated or truncated):
                 observation, reward, terminated, truncated, info = cartpole_env.step(
-                    action=dqn_agent.eval_take_action(observation=observation, reward=reward))
+                    action=dqn_agent.eval_take_action(observation=observation))
                 eval_reward += reward
             print(f"Eon: {i}, avg_reward: {eval_reward / 1000} ")
 
