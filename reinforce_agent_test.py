@@ -39,7 +39,7 @@ cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
 learning_rate = 2**(-9)
-report_frequency = 1000
+report_frequency = 100
 total_reward = 0
 
 for i in range(episodes):

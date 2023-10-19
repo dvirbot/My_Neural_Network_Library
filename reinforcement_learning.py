@@ -157,7 +157,7 @@ class DQNAgent:
 
     def update_target(self):
         # self.target_q_network = copy.deepcopy(self.current_q_network)
-        #I am using this instead of the commented deepcopy code because deepcopy was very slow for some reason
+        # I am using this instead of the commented deepcopy code because deepcopy was very slow for some reason
         self.target_q_network = _pickle.loads(_pickle.dumps(self.current_q_network))
 
     def update_weights(self, learning_rate):

@@ -37,11 +37,13 @@ cartpole_env = gym.make("CartPole-v1")
 episodes = 100001
 learning_rate = 2 ** (-7)
 report_frequency = 100
-eval_frequency = 10000
+eval_frequency = 1000
 total_reward = 0
 step = 0
 learn_frequency = 32
 update_target_frequency = 100
+automatic_eon_threshold = 100
+eon = 0
 
 for i in range(episodes):
     # if i % 50 == 0:
@@ -72,7 +74,8 @@ for i in range(episodes):
         #     cartpole_env.reset()
         #     break
         total_reward = 0
-    if i % eval_frequency == 0 and i > 1 or total_reward/report_frequency > 100:
+    if i % eval_frequency == 0 and i > 1 or total_reward/report_frequency > automatic_eon_threshold:
+        eon += 1
         eval_reward = 0
         for j in range(1000):
             observation: np.ndarray
@@ -85,7 +88,10 @@ for i in range(episodes):
                 observation, reward, terminated, truncated, info = cartpole_env.step(
                     action=dqn_agent.eval_take_action(observation=observation))
                 eval_reward += reward
-            print(f"Eon: {i}, avg_reward: {eval_reward / 1000} ")
+        print(f"Eon: {eon}, avg_reward: {eval_reward / 1000} ")
+        if total_reward/report_frequency > automatic_eon_threshold:
+            automatic_eon_threshold *= 1.5
+        dqn_agent.current_q_network.save_weights(f"DQN_Eon_{eon}")
 
 
 
