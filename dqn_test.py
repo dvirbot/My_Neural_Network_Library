@@ -5,17 +5,14 @@ import random
 import numpy as np
 
 neural_network = neuralnetworks.NeuralNetwork(size_of_inputs=4, keep_buffer=False)
-neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=7,
+neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
                                                    size_of_inputs=4,
                                                    activation_function=neuralnetworks.Sigmoid()))
-neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=7,
-                                                   size_of_inputs=7,
-                                                   activation_function=neuralnetworks.Sigmoid()))
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
-                                                   size_of_inputs=7,
+                                                   size_of_inputs=15,
                                                    activation_function=neuralnetworks.ActivationFunction()))
 dqn_agent = reinforcement_learning.DQNAgent(neural_network=neural_network,
-                                            future_discount_factor=0.98, epsilon=0.05, replay_buffer_size=1000)
+                                            future_discount_factor=0.98, epsilon=0.05, replay_buffer_size=10000)
 
 # cartpole_env = gym.make("CartPole-v1", render_mode="human")
 #
@@ -38,7 +35,7 @@ dqn_agent = reinforcement_learning.DQNAgent(neural_network=neural_network,
 cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
-learning_rate = 2 ** (-5)
+learning_rate = 2 ** (-7)
 report_frequency = 100
 eval_frequency = 10000
 total_reward = 0
@@ -61,9 +58,9 @@ for i in range(episodes):
         observation = observation.tolist()
         total_reward += reward
         step += 1
-        if step % learn_frequency == 0 and step > 1000:
+        if step % learn_frequency == 0 and step > 10000:
             dqn_agent.update_weights(learning_rate)
-        if step % update_target_frequency == 0 and step > 1000:
+        if step % update_target_frequency == 0 and step > 10000:
             dqn_agent.update_target()
         # cartpole_env.render()
     dqn_agent.get_final_reward(reward)

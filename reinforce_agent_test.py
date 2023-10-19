@@ -59,6 +59,7 @@ for i in range(episodes):
     reinforce_agent.update_weights(learning_rate)
     reinforce_agent.episode_reset()
     if i%report_frequency == 0:
+
         print(f"Episode: {i}, avg_reward: {total_reward / report_frequency} ")
         # if total_reward/1000 > 60:
         #     cartpole_env.reset()

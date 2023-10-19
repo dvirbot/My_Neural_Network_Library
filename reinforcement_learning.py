@@ -176,6 +176,9 @@ class DQNAgent:
             self.current_q_network.backwards(gradient)
         self.current_q_network.descend_the_gradient(learning_rate)
 
+    def epsilon_decay(self, factor):
+        self.epsilon *= factor
+
 
 
 
