@@ -44,7 +44,8 @@ cartpole_env.close()
 cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
-learning_rate = 2 ** (-7)
+policy_learning_rate = 2 ** (-9)
+value_learning_rate = 2 ** (-7)
 report_frequency = 100
 eval_frequency = 1000
 total_reward = 0
@@ -70,12 +71,12 @@ for i in range(episodes):
         total_reward += reward
         step += 1
         if step % learn_frequency == 0 and step > 10000:
-            actor_critic_agent.update_weights(policy_learning_rate=learning_rate, value_learning_rate=learning_rate)
+            actor_critic_agent.update_weights(policy_learning_rate=policy_learning_rate, value_learning_rate=value_learning_rate)
         if step % update_target_frequency == 0 and step > 10000:
             actor_critic_agent.update_target()
         # cartpole_env.render()
     actor_critic_agent.get_final_reward(reward)
-    actor_critic_agent.update_weights(policy_learning_rate=learning_rate, value_learning_rate=learning_rate)
+    actor_critic_agent.update_weights(policy_learning_rate=policy_learning_rate, value_learning_rate=value_learning_rate)
     actor_critic_agent.episode_reset()
     if i % report_frequency == 0:
         print(f"Episode: {i}, avg_reward: {total_reward / report_frequency} ")

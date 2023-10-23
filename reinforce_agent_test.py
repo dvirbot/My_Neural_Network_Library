@@ -7,10 +7,10 @@ import numpy as np
 neural_network = neuralnetworks.NeuralNetwork(size_of_inputs=4, keep_buffer=False)
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=10,
                                                    size_of_inputs=4,
-                                                   activation_function=neuralnetworks.Sigmoid()))
+                                                   activation_function=neuralnetworks.RectifiedLinearUnit()))
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=10,
                                                    size_of_inputs=10,
-                                                   activation_function=neuralnetworks.Sigmoid()))
+                                                   activation_function=neuralnetworks.RectifiedLinearUnit()))
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
                                                    size_of_inputs=10,
                                                    activation_function=neuralnetworks.ActivationFunction()))

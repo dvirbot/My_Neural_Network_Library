@@ -6,10 +6,11 @@ import _pickle
 
 
 def softmax(values):
+    max_value = max(values)
     exponentiated_probabilities_summed = 0
     for value in values:
-        exponentiated_probabilities_summed += np.exp(value)
-    return [np.exp(value) / exponentiated_probabilities_summed for value in values]
+        exponentiated_probabilities_summed += np.exp(value - max_value)
+    return [np.exp(value - max_value) / exponentiated_probabilities_summed for value in values]
 
 
 def softmax_gradient(prob_distribution, action):
