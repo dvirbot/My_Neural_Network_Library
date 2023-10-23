@@ -83,6 +83,9 @@ class NeuralNetwork:
                     weight.value = float(weights.pop(0))
                 neuron.bias.value = float(weights.pop(0))
 
+    def __call__(self, inputs: list):
+        return self.forwards(inputs)
+
 
 
 

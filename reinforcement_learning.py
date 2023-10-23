@@ -65,8 +65,8 @@ class ReinforceAgent:
             action_probabilities_at_timestep = self.neural_network.forwards(current_experience.observation)
             action_at_timestep = current_experience.action
             gradient = np.multiply((value_at_timestep / action_probabilities_at_timestep[action_at_timestep]),
-                                    np.array(softmax_gradient(prob_distribution=action_probabilities_at_timestep,
-                                                              action=action_at_timestep))).tolist()
+                                   np.array(softmax_gradient(prob_distribution=action_probabilities_at_timestep,
+                                                             action=action_at_timestep))).tolist()
             self.neural_network.backwards(loss_function_gradients=gradient)
             self.neural_network.descend_the_gradient(learning_rate=learning_rate)
         self.replay_buffer.clear_buffer()
@@ -119,13 +119,13 @@ class ReplayBuffer:
             self.full = True
             self.index = 0
 
-
     def clear_buffer(self):
         self.buffer: list[Experience] = []
 
 
 class DQNAgent:
-    def __init__(self, neural_network: neuralnetworks.NeuralNetwork, future_discount_factor, replay_buffer_size, epsilon=0.05):
+    def __init__(self, neural_network: neuralnetworks.NeuralNetwork, future_discount_factor, replay_buffer_size,
+                 epsilon=0.05):
         self.current_q_network = neural_network
         self.target_q_network = copy.deepcopy(self.current_q_network)
         self.action_space = [i for i in range(neural_network.layers[-1].number_of_neurons)]
@@ -161,7 +161,6 @@ class DQNAgent:
         self.target_q_network = _pickle.loads(_pickle.dumps(self.current_q_network))
 
     def update_weights(self, learning_rate):
-        learning_rate *= 1
         empty_gradient = [0 for action in self.action_space]
         for experience in random.choices(population=self.replay_buffer.buffer, k=32):
             if experience.next_observation is None:
@@ -183,5 +182,74 @@ class DQNAgent:
         self.epsilon *= factor
 
 
+class ActorCriticAgent:
+    def __init__(self, policy_network: neuralnetworks.NeuralNetwork, value_network: neuralnetworks.NeuralNetwork,
+                 future_discount_factor, replay_buffer_size):
+        self.current_value_network = value_network
+        self.target_value_network = copy.deepcopy(self.current_value_network)
+        self.policy_network = policy_network
+        self.action_space = [i for i in range(self.policy_network.layers[-1].number_of_neurons)]
+        self.replay_buffer = ReplayBuffer(max_size=replay_buffer_size)
+        self.loss_function = neuralnetworks.MeanSquaredLoss()
+        self.future_discount_factor = future_discount_factor
 
+    def episode_reset(self):
+        pass
 
+    def take_step(self, observation, reward=None):
+        action_outputs = self.policy_network.forwards(observation)
+        action_probabilities = softmax(action_outputs)
+        action = random.choices(population=self.action_space, weights=action_probabilities, k=1)[0]
+        if reward is not None:
+            self.replay_buffer.update_buffer(observation, action, reward)
+            return action
+        self.replay_buffer.first_step_update_buffer(observation, action)
+        return action
+
+    def get_final_reward(self, reward):
+        self.replay_buffer.last_step_update_buffer(reward)
+
+    def eval_take_action(self, observation):
+        action_outputs = self.policy_network.forwards(observation)
+        action_probabilities = softmax(action_outputs)
+        action = random.choices(population=self.action_space, weights=action_probabilities, k=1)[0]
+        return action
+
+    def update_target(self):
+        # self.target_q_network = copy.deepcopy(self.current_q_network)
+        # I am using this instead of the commented deepcopy code because deepcopy was very slow for some reason
+        self.target_value_network = _pickle.loads(_pickle.dumps(self.current_value_network))
+
+    def update_weights(self, policy_learning_rate, value_learning_rate):
+        policy_learning_rate *= -1
+        for experience in random.choices(population=self.replay_buffer.buffer, k=32):
+            if experience.next_observation is None:
+                action_probabilities = self.policy_network.forwards(experience.observation)
+                learning_factor = (experience.reward - self.current_value_network(experience.observation)[0]) / \
+                                  action_probabilities[experience.action]
+                policy_gradients: np.ndarray = np.multiply(
+                    softmax_gradient(prob_distribution=action_probabilities, action=experience.action),
+                    learning_factor).tolist()
+                self.policy_network.backwards(policy_gradients)
+                value_gradients = self.loss_function.calculate_derivatives(
+                    guesses=self.current_value_network.forwards(experience.observation), targets=[experience.reward])
+                self.current_value_network.backwards(value_gradients)
+                continue
+            action_probabilities = self.policy_network.forwards(experience.observation)
+            learning_factor = (experience.reward + self.future_discount_factor * self.current_value_network(
+                experience.next_observation)[0] - self.current_value_network(experience.observation)[0]) / \
+                              action_probabilities[experience.action]
+            policy_gradients: np.ndarray = np.multiply(
+                softmax_gradient(prob_distribution=action_probabilities, action=experience.action),
+                learning_factor).tolist()
+            self.policy_network.backwards(policy_gradients)
+            value_gradients = self.loss_function.calculate_derivatives(
+                guesses=self.current_value_network.forwards(experience.observation),
+                targets=[experience.reward + self.future_discount_factor * self.target_value_network(
+                    experience.next_observation)[0]])
+            self.current_value_network.backwards(value_gradients)
+        self.policy_network.descend_the_gradient(policy_learning_rate)
+        self.current_value_network.descend_the_gradient(value_learning_rate)
+
+    def epsilon_decay(self, factor):
+        self.epsilon *= factor

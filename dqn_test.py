@@ -11,6 +11,7 @@ neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
                                                    size_of_inputs=15,
                                                    activation_function=neuralnetworks.ActivationFunction()))
+# neural_network.load_weights("First DQN Saved Eons (19_10_23)/DQN_Eon_5")
 dqn_agent = reinforcement_learning.DQNAgent(neural_network=neural_network,
                                             future_discount_factor=0.98, epsilon=0.05, replay_buffer_size=10000)
 
@@ -26,7 +27,7 @@ dqn_agent = reinforcement_learning.DQNAgent(neural_network=neural_network,
 #     reward = None
 #     while not terminated or truncated:
 #         observation, reward, terminated, truncated, info = cartpole_env.step(
-#             action=dqn_agent.take_step(observation=observation))
+#             action=dqn_agent.eval_take_action(observation=observation))
 #         observation = observation.tolist()
 #     dqn_agent.episode_reset()
 #
