@@ -5,14 +5,14 @@ import random
 import numpy as np
 
 neural_network = neuralnetworks.NeuralNetwork(size_of_inputs=4, keep_buffer=False)
-neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=10,
+neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
                                                    size_of_inputs=4,
-                                                   activation_function=neuralnetworks.RectifiedLinearUnit()))
-neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=10,
-                                                   size_of_inputs=10,
-                                                   activation_function=neuralnetworks.RectifiedLinearUnit()))
+                                                   activation_function=neuralnetworks.Sigmoid()))
+neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
+                                                   size_of_inputs=15,
+                                                   activation_function=neuralnetworks.Sigmoid()))
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
-                                                   size_of_inputs=10,
+                                                   size_of_inputs=15,
                                                    activation_function=neuralnetworks.ActivationFunction()))
 reinforce_agent = reinforcement_learning.ReinforceAgent(neural_network=neural_network,
                                                         future_discount_factor=0.98)
@@ -38,7 +38,7 @@ cartpole_env.close()
 cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
-learning_rate = 2**(-9)
+learning_rate = 2**(-8)
 report_frequency = 100
 total_reward = 0
 

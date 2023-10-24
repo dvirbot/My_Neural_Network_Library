@@ -5,16 +5,19 @@ import random
 import numpy as np
 
 policy_neural_network = neuralnetworks.NeuralNetwork(size_of_inputs=4, keep_buffer=False)
-policy_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
+policy_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=20,
                                                           size_of_inputs=4,
-                                                          activation_function=neuralnetworks.RectifiedLinearUnit()))
+                                                          activation_function=neuralnetworks.Sigmoid()))
+policy_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=20,
+                                                          size_of_inputs=20,
+                                                          activation_function=neuralnetworks.Sigmoid()))
 policy_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
-                                                          size_of_inputs=15,
+                                                          size_of_inputs=20,
                                                           activation_function=neuralnetworks.ActivationFunction()))
 value_neural_network = neuralnetworks.NeuralNetwork(size_of_inputs=4, keep_buffer=False)
 value_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
                                                          size_of_inputs=4,
-                                                         activation_function=neuralnetworks.RectifiedLinearUnit()))
+                                                         activation_function=neuralnetworks.Sigmoid()))
 value_neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=1,
                                                          size_of_inputs=15,
                                                          activation_function=neuralnetworks.ActivationFunction()))
@@ -45,7 +48,7 @@ cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
 policy_learning_rate = 2 ** (-9)
-value_learning_rate = 2 ** (-7)
+value_learning_rate = 2 ** (-8)
 report_frequency = 100
 eval_frequency = 1000
 total_reward = 0
@@ -76,7 +79,7 @@ for i in range(episodes):
             actor_critic_agent.update_target()
         # cartpole_env.render()
     actor_critic_agent.get_final_reward(reward)
-    actor_critic_agent.update_weights(policy_learning_rate=policy_learning_rate, value_learning_rate=value_learning_rate)
+    # actor_critic_agent.update_weights(policy_learning_rate=policy_learning_rate, value_learning_rate=value_learning_rate)
     actor_critic_agent.episode_reset()
     if i % report_frequency == 0:
         print(f"Episode: {i}, avg_reward: {total_reward / report_frequency} ")

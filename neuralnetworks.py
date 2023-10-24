@@ -183,13 +183,18 @@ class Sigmoid(ActivationFunction):
         super(Sigmoid, self).__init__()
 
     def sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
+        if x > 0:
+            return 1 / (1 + np.exp(-x))
+        return np.exp(x) / (1 + np.exp(x))
 
     def apply(self, neuron_value):
         return self.sigmoid(neuron_value)
 
     def derivative(self, neuron_derivative, pre_activation_value):
         return self.sigmoid(pre_activation_value) * self.sigmoid(1 - pre_activation_value) * neuron_derivative
+
+    def __call__(self, neuron_value):
+        return self.sigmoid(neuron_value)
 
 
 class RectifiedLinearUnit(ActivationFunction):

@@ -67,7 +67,7 @@ for i in range(episodes):
             dqn_agent.update_target()
         # cartpole_env.render()
     dqn_agent.get_final_reward(reward)
-    dqn_agent.update_weights(learning_rate)
+    # dqn_agent.update_weights(learning_rate)
     dqn_agent.episode_reset()
     if i % report_frequency == 0:
         print(f"Episode: {i}, avg_reward: {total_reward / report_frequency} ")
@@ -92,7 +92,7 @@ for i in range(episodes):
         print(f"Eon: {eon}, avg_reward: {eval_reward / 1000} ")
         if total_reward/report_frequency > automatic_eon_threshold:
             automatic_eon_threshold *= 1.5
-        dqn_agent.current_q_network.save_weights(f"DQN_Eon_{eon}")
+        # dqn_agent.current_q_network.save_weights(f"DQN_Eon_{eon}")
 
 
 
