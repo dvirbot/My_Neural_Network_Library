@@ -7,7 +7,7 @@ import _pickle
 
 def softmax(values):
     values = np.array(values)
-    max_value = values.max()
+    max_value = np.max(values)
     values -= max_value
     ret: np.ndarray = np.exp(values) / np.exp(values).sum()
     return ret.tolist()
@@ -63,7 +63,8 @@ class ReinforceAgent:
         for i in range(0, len(self.replay_buffer.buffer)):
             current_experience: Experience = self.replay_buffer.buffer[-i]
             value_at_timestep += current_experience.reward * self.future_discount_factor ** (self.episode_len - i - 1)
-            action_probabilities_at_timestep = self.neural_network.forwards(current_experience.observation)
+            action_neuron_values_at_timestep = self.neural_network.forwards(current_experience.observation)
+            action_probabilities_at_timestep = softmax(action_neuron_values_at_timestep)
             action_at_timestep = current_experience.action
             gradient = np.multiply((value_at_timestep / action_probabilities_at_timestep[action_at_timestep]),
                                    np.array(softmax_gradient(prob_distribution=action_probabilities_at_timestep,
@@ -200,6 +201,7 @@ class ActorCriticAgent:
     def take_step(self, observation, reward=None):
         action_outputs = self.policy_network.forwards(observation)
         action_probabilities = softmax(action_outputs)
+        # print(f"action probabilities: {action_probabilities}")
         action = random.choices(population=self.action_space, weights=action_probabilities, k=1)[0]
         if reward is not None:
             self.replay_buffer.update_buffer(observation, action, reward)
@@ -225,21 +227,28 @@ class ActorCriticAgent:
         policy_learning_rate *= -1
         for experience in random.choices(population=self.replay_buffer.buffer, k=32):
             if experience.next_observation is None:
-                action_probabilities = self.policy_network.forwards(experience.observation)
+                action_values = self.policy_network.forwards(experience.observation)
+                action_probabilities = softmax(action_values)
+                print(f"backprop action probabilities = {action_probabilities}")
+                print(f"backprop current_value = {self.current_value_network(experience.observation)[0]}")
+                print(f"backprop current reward = {experience.reward}")
                 learning_factor = (experience.reward - self.current_value_network(experience.observation)[0]) / \
                                   action_probabilities[experience.action]
-                policy_gradients: np.ndarray = np.multiply(
-                    softmax_gradient(prob_distribution=action_probabilities, action=experience.action),
-                    learning_factor).tolist()
+                policy_gradients: np.ndarray = (learning_factor*np.array(
+                    softmax_gradient(prob_distribution=action_probabilities, action=experience.action))).tolist()
                 self.policy_network.backwards(policy_gradients)
                 continue
-            action_probabilities = self.policy_network.forwards(experience.observation)
+            action_values = self.policy_network.forwards(experience.observation)
+            action_probabilities = softmax(action_values)
+            print(f"backprop action probabilities = {action_probabilities}")
+            print(f"backprop current_value = {self.current_value_network(experience.observation)[0]}")
+            print(f"backprop next_value = {self.future_discount_factor * self.current_value_network(experience.next_observation)[0]}")
+            print(f"backprop current reward = {experience.reward}")
             learning_factor = (experience.reward + self.future_discount_factor * self.current_value_network(
                 experience.next_observation)[0] - self.current_value_network(experience.observation)[0]) / \
                               action_probabilities[experience.action]
-            policy_gradients: np.array = np.multiply(
-                softmax_gradient(prob_distribution=action_probabilities, action=experience.action),
-                learning_factor).tolist()
+            policy_gradients: np.array = (learning_factor*np.array(softmax_gradient(prob_distribution=action_probabilities, action=experience.action),
+                learning_factor)).tolist()
             self.policy_network.backwards(policy_gradients)
         for experience in random.choices(population=self.replay_buffer.buffer, k=128):
             if experience.next_observation is None:
@@ -249,7 +258,7 @@ class ActorCriticAgent:
                 continue
             value_gradients = self.loss_function.calculate_derivatives(
                 guesses=self.current_value_network.forwards(experience.observation),
-                targets=[experience.reward + self.future_discount_factor * self.current_value_network(
+                targets=[experience.reward + self.future_discount_factor * self.target_value_network(
                     experience.next_observation)[0]])
             self.current_value_network.backwards(value_gradients)
         self.policy_network.descend_the_gradient(policy_learning_rate)

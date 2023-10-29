@@ -11,27 +11,27 @@ neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=15,
 neural_network.add_layer(neuralnetworks.DenseLayer(number_of_neurons=2,
                                                    size_of_inputs=15,
                                                    activation_function=neuralnetworks.ActivationFunction()))
-# neural_network.load_weights("First DQN Saved Eons (19_10_23)/DQN_Eon_5")
+neural_network.load_weights("DQN_Eon_separate_1")
 dqn_agent = reinforcement_learning.DQNAgent(neural_network=neural_network,
                                             future_discount_factor=0.98, epsilon=0.05, replay_buffer_size=10000)
 
-# cartpole_env = gym.make("CartPole-v1", render_mode="human")
-#
-# for j in range(10):
-#     observation: np.ndarray
-#     observation, info = cartpole_env.reset()
-#     cartpole_env.render()
-#     observation: list = observation.tolist()
-#     terminated = False
-#     truncated = False
-#     reward = None
-#     while not terminated or truncated:
-#         observation, reward, terminated, truncated, info = cartpole_env.step(
-#             action=dqn_agent.eval_take_action(observation=observation))
-#         observation = observation.tolist()
-#     dqn_agent.episode_reset()
-#
-# cartpole_env.close()
+cartpole_env = gym.make("CartPole-v1", render_mode="human")
+
+for j in range(10):
+    observation: np.ndarray
+    observation, info = cartpole_env.reset()
+    cartpole_env.render()
+    observation: list = observation.tolist()
+    terminated = False
+    truncated = False
+    reward = None
+    while not (terminated or truncated):
+        observation, reward, terminated, truncated, info = cartpole_env.step(
+            action=dqn_agent.eval_take_action(observation=observation))
+        observation = observation.tolist()
+    dqn_agent.episode_reset()
+
+cartpole_env.close()
 
 cartpole_env = gym.make("CartPole-v1")
 
@@ -92,7 +92,7 @@ for i in range(episodes):
         print(f"Eon: {eon}, avg_reward: {eval_reward / 1000} ")
         if total_reward/report_frequency > automatic_eon_threshold:
             automatic_eon_threshold *= 1.5
-        # dqn_agent.current_q_network.save_weights(f"DQN_Eon_{eon}")
+        dqn_agent.current_q_network.save_weights(f"DQN_Eon_separate_again_{eon}")
 
 
 
@@ -107,7 +107,7 @@ for j in range(10):
     terminated = False
     truncated = False
     reward = None
-    while not terminated or truncated:
+    while not (terminated or truncated):
         observation, reward, terminated, truncated, info = cartpole_env.step(
             action=dqn_agent.take_step(observation=observation))
         observation = observation.tolist()

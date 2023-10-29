@@ -19,7 +19,7 @@ reinforce_agent = reinforcement_learning.ReinforceAgent(neural_network=neural_ne
 
 cartpole_env = gym.make("CartPole-v1", render_mode="human")
 
-for j in range(10):
+for j in range(3):
     observation: np.ndarray
     observation, info = cartpole_env.reset()
     cartpole_env.render()
@@ -27,7 +27,7 @@ for j in range(10):
     terminated = False
     truncated = False
     reward = None
-    while not terminated or truncated:
+    while not (terminated or truncated):
         observation, reward, terminated, truncated, info = cartpole_env.step(
             action=reinforce_agent.take_step(observation=observation))
         observation = observation.tolist()

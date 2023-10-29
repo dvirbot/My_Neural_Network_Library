@@ -26,29 +26,29 @@ actor_critic_agent = reinforcement_learning.ActorCriticAgent(policy_network=poli
                                                              value_network=value_neural_network,
                                                              future_discount_factor=0.98, replay_buffer_size=10000)
 
-cartpole_env = gym.make("CartPole-v1", render_mode="human")
-
-for j in range(10):
-    observation: np.ndarray
-    observation, info = cartpole_env.reset()
-    cartpole_env.render()
-    observation: list = observation.tolist()
-    terminated = False
-    truncated = False
-    reward = None
-    while not terminated or truncated:
-        observation, reward, terminated, truncated, info = cartpole_env.step(
-            action=actor_critic_agent.eval_take_action(observation=observation))
-        observation = observation.tolist()
-    actor_critic_agent.episode_reset()
-
-cartpole_env.close()
+# cartpole_env = gym.make("CartPole-v1", render_mode="human")
+#
+# for j in range(10):
+#     observation: np.ndarray
+#     observation, info = cartpole_env.reset()
+#     cartpole_env.render()
+#     observation: list = observation.tolist()
+#     terminated = False
+#     truncated = False
+#     reward = None
+#     while not (terminated or truncated):
+#         observation, reward, terminated, truncated, info = cartpole_env.step(
+#             action=actor_critic_agent.eval_take_action(observation=observation))
+#         observation = observation.tolist()
+#     actor_critic_agent.episode_reset()
+#
+# cartpole_env.close()
 
 cartpole_env = gym.make("CartPole-v1")
 
 episodes = 100001
-policy_learning_rate = 2 ** (-9)
-value_learning_rate = 2 ** (-8)
+policy_learning_rate = 2 ** (-11)
+value_learning_rate = 2 ** (-10)
 report_frequency = 100
 eval_frequency = 1000
 total_reward = 0
